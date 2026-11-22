@@ -12,7 +12,7 @@ st.set_page_config(page_title="Project Readiness Radar", layout="wide")
 
 # Streamlit Cloud secrets -> environment variables (the explainer reads os.environ). Optional.
 try:
-    for _k in ("GEMINI_API_KEY", "GROQ_API_KEY", "EXPLAINER_PROVIDER", "EXPLAINER_MODEL"):
+    for _k in ("DATABASE_URL", "ADMIN_USERNAME", "ADMIN_PASSWORD", "GEMINI_API_KEY", "GROQ_API_KEY", "EXPLAINER_PROVIDER", "EXPLAINER_MODEL"):
         if _k in st.secrets and _k not in os.environ:
             os.environ[_k] = str(st.secrets[_k])
 except Exception:
