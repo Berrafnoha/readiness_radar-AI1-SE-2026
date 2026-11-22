@@ -28,8 +28,8 @@ Streamlit App (app.py) ──────────┘         ├── audit
                                            ├── explainer.py (grounded AI)
                                            ├── pdf_record.py (verification PDF)
                                            └── whatif.py (scenario simulation)
-
-## Run (PostgreSQL + real login)
+---
+ ## Run (PostgreSQL + real login)
 Requirements: Python 3.12, Docker Desktop.
 ```powershell
 docker compose up -d                          # PostgreSQL 16 on localhost:5432 (user/password/db: radar)
@@ -86,10 +86,3 @@ The legacy Streamlit demo (`streamlit run app.py`) uses the same database but de
 - Not built: PDF/quotation extraction with human confirmation (see docs/NEXT_STEPS.md, prompt 8), real authentication, P6 XER import.
 - Audit chain is tamper-evident, not tamper-proof (someone with raw DB access could rebuild it).
 
-
-## Web UI (FastAPI + single-page app)
-```powershell
-python -m uvicorn api:app --reload      # then open http://127.0.0.1:8000
-```
-`api.py` only maps HTTP to `radar/services.py` (permissions stay in services). The page is `web/index.html` (no build step).
-The Streamlit app (`streamlit run app.py`) remains and has the extra pages: What-if, Import, Change requests, Sync queue, PDF.
