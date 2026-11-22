@@ -27,8 +27,9 @@ FastAPI Web UI (api.py + web/) ──┐
 Streamlit App (app.py) ──────────┘         ├── audit.py (hash-chained log)
                                            ├── explainer.py (grounded AI)
                                            ├── pdf_record.py (verification PDF)
-                                           └── whatif.py (scenario simulation)
----
+                                           └── whatif.py (scenario simulation).
+
+```
  ## Run (PostgreSQL + real login)
 Requirements: Python 3.12, Docker Desktop.
 ```powershell
@@ -42,10 +43,7 @@ $env:ADMIN_PASSWORD="choose-a-long-password"   # first admin, created only if th
 python -m pytest -q                           # tests use isolated schemas in the same database
 python -m uvicorn api:app --reload            # open http://127.0.0.1:8000 and sign in
 ```
-First start creates the schema (migrations/*.sql), the admin account, and loads the synthetic demo project
-(`SEED_DEMO=0` for an empty database). Sign in as admin, open **Users**, and create a Field Engineer and a Project Director.
-Command line: `python -m radar.cli create-user NAME --role field_engineer` | `migrate` | `seed-demo`.
-The legacy Streamlit demo (`streamlit run app.py`) uses the same database but demo identities, not real login.
+
 
 ## Real login: how it works
 - Passwords hashed with scrypt (random salt); minimum 10 characters. Sessions are server-side (token stored hashed), 12 h, HttpOnly + SameSite=Lax cookie (`COOKIE_SECURE=1` behind HTTPS).
