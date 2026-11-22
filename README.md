@@ -1,9 +1,33 @@
 # Project Readiness Radar
 
-Human-in-the-loop consistency checker that sits on top of existing planning sheets (P6 / MS Project / Excel exports).
-It cross-checks plan vs. deliveries vs. quantities vs. inspections with **deterministic rules**, shows the evidence,
-and keeps **operational confirmation** (Field Engineer) separate from **formal authorization** (Project Director).
-All demo data is synthetic.
+**Authors:** BERRAF Noha & BAKIRI Soundous
+
+Human-in-the-loop consistency checker that sits on top of existing planning sheets (P6 / MS Project / Excel exports). It cross-checks plans, deliveries, quantities, and inspections using **deterministic rules**, surfaces concrete evidence, and enforces separation of duties between **operational confirmation** (Field Engineer) and **formal authorization** (Project Director).
+
+---
+
+## Live Deployments & Interfaces
+
+Both interfaces share the same core rule engine (`radar/`) and PostgreSQL database:
+
+- **Public Web Application (FastAPI):** [https://readiness-radar1.onrender.com](https://readiness-radar1.onrender.com)  
+  *Full multi-user web platform with role-based login, session management, and API documentation (`/docs`).*
+- **Internal Company Dashboard (Streamlit):** [https://readiness-radar-f6z5fud4xti6fbzaqbpbkg.streamlit.app](https://readiness-radar-f6z5fud4xti6fbzaqbpbkg.streamlit.app)  
+  *Streamlined internal desktop/company interface designed for quick operational reviews and local deployments.*
+
+> *Note: The FastAPI web app runs on Render's free tier and may take ~30–50 seconds to wake up on the first visit after inactivity.*
+
+---
+
+## Architecture
+
+```text
+FastAPI Web UI (api.py + web/) ──┐
+                                 ├──> radar/services.py ──> radar/rules.py ──> PostgreSQL
+Streamlit App (app.py) ──────────┘         ├── audit.py (hash-chained log)
+                                           ├── explainer.py (grounded AI)
+                                           ├── pdf_record.py (verification PDF)
+                                           └── whatif.py (scenario simulation)
 
 ## Run (PostgreSQL + real login)
 Requirements: Python 3.12, Docker Desktop.
@@ -30,11 +54,6 @@ The legacy Streamlit demo (`streamlit run app.py`) uses the same database but de
 - Services trust only the role carried by the authenticated user object, never a plain string. All login, logout, failed-login and user-admin events go to the audit log.
 - Audit appends are serialized with a PostgreSQL advisory lock so concurrent users cannot fork the hash chain (tested with 4 threads).
 
-## Architecture
-```
-app.py (UI) -> radar/services.py (permissions + actions) -> radar/rules.py (pure rules) -> SQLite
-                  |-> audit.py (hash-chained log)  |-> explainer.py (AI, grounded)  |-> pdf_record.py  |-> whatif.py
-```
 
 ## Rules
 | ID | What it detects |
@@ -67,15 +86,6 @@ app.py (UI) -> radar/services.py (permissions + actions) -> radar/rules.py (pure
 - Not built: PDF/quotation extraction with human confirmation (see docs/NEXT_STEPS.md, prompt 8), real authentication, P6 XER import.
 - Audit chain is tamper-evident, not tamper-proof (someone with raw DB access could rebuild it).
 
-## Demo script (6 minutes)
-1. Dashboard: 4 risks, 4 data gaps, 6 activities forecast to slip.
-2. Findings > pump (R1): evidence + 6 affected activities. Click "Explain this finding".
-3. Findings > steel (R5): estimate 18 t vs specified 21.5 t (-16.3%). Concrete (-3.4%) is correctly NOT flagged.
-4. As Karim (engineer): record verified pump date 2026-10-25 + source -> finding auto-resolves, forecast shrinks.
-5. Stages: submit S1 as ready -> R3 fires. As Samira (director): authorize fails. Karim closes I2, Samira authorizes.
-6. Change requests: Karim requests A4 start 2026-10-29 with impact preview; Samira approves.
-7. Offline: toggle offline, record an update, show the queue, toggle back, Sync now.
-8. Generate the PDF record. Audit log: Verify integrity, export.
 
 ## Web UI (FastAPI + single-page app)
 ```powershell
